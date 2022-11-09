@@ -6,23 +6,34 @@ using UnityEngine.EventSystems;
 public class Piece : MonoBehaviour
 {
     [HideInInspector] public PieceType type;
-    private BoxCollider2D collider;
+    private BoxCollider2D coll2D;
     private List<Cell> legalMoves = new List<Cell>();
     private bool isDragging;
-    Transform newLocation;
+    private Transform newLocation;
+    private bool isSet = false;
 
     public void SetPieceType(PieceType _type) => type = _type;
 
     public void SetCollider()
     {
-        collider = GetComponent<BoxCollider2D>();
-        collider.size = new Vector3(4, 4, 0);
+        coll2D = GetComponent<BoxCollider2D>();
+        coll2D.size = new Vector3(4, 4, 0);
     }
 
     private void Update()
     {
         if (isDragging)
             transform.position = Input.mousePosition;
+
+        float step = 5000 * Time.deltaTime;
+
+        if (!isSet)
+        {
+            GetComponent<RectTransform>().anchoredPosition = Vector2.MoveTowards(
+                GetComponent<RectTransform>().anchoredPosition,
+                new Vector3(GetComponent<RectTransform>().anchoredPosition.x, 0, 0),
+                step);
+        }
     }
 
     public void StartDrag()
@@ -42,6 +53,18 @@ public class Piece : MonoBehaviour
             legalMoves = new List<Cell>();
         }
         GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+    }
+
+    public void Raise()
+    {
+        isSet = true;
+        float step = 5000 * Time.deltaTime;
+
+        GetComponent<RectTransform>().anchoredPosition = Vector2.MoveTowards(
+            GetComponent<RectTransform>().anchoredPosition,
+            new Vector3(GetComponent<RectTransform>().anchoredPosition.x, 2000, 0),
+            step);
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

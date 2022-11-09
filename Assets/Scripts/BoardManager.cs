@@ -19,22 +19,26 @@ public enum PieceType
 
 public class BoardManager : MonoBehaviour
 {
+    [Header("Setup")]
     public Cell cell;
     public Piece piece;
     public Sprite[] pieceSprites;
     public RectTransform parent;
-    public int dimensions;
     public Color pieceColor;
     public Color ligher;
     public Color darker;
-    public TileData boardData;
 
-    private Cell[,] cells;
+    [Header("Board")]
+    public UC_Level boardData;
+
     private List<Piece> currentPieces;
-    private float cellSize;
     private Vector2 offset;
+    private bool boardSet;
+    
+    public float cellSize { get; private set; }
+    public Cell[,] cells { get; private set; }
 
-    [HideInInspector] public Piece selectedPiece;
+ //   [HideInInspector] public Piece selectedPiece;
 
     public static BoardManager instance;
 
@@ -45,19 +49,23 @@ public class BoardManager : MonoBehaviour
 
     void Start()
     {
-        cells = new Cell[dimensions, dimensions];
+        cells = new Cell[boardData.dimension, boardData.dimension];
         currentPieces = new List<Piece>();
-        cellSize = parent.sizeDelta.x / dimensions;
+        cellSize = parent.sizeDelta.x / boardData.dimension;
         offset = new Vector2(-650 + (cellSize / 2), 650 - (cellSize / 2));
+        boardSet = false;
         GenerateBoard();
-        SetBoard();
+        StartCoroutine(SetBoard());
     }
 
     private void Update()
     {
-        currentPieces.RemoveAll(p => p == null);
-        if (currentPieces.Count == 1)
-            Debug.Log("You Win");
+        if (boardSet)
+        {
+            currentPieces.RemoveAll(p => p == null);
+            if (currentPieces.Count == 1)
+                HelperScript.instance.DelayedExecution(.4f, () => currentPieces[0].Raise());
+        }
     }
 
     public void ClearCell(Cell cell, PieceType type)
@@ -71,9 +79,9 @@ public class BoardManager : MonoBehaviour
 
     private void GenerateBoard()
     {
-        for (int i = 0; i < dimensions; i++)
+        for (int i = 0; i < boardData.dimension; i++)
         {
-            for (int j = 0; j < dimensions; j++)
+            for (int j = 0; j < boardData.dimension; j++)
             {
                 cells[i, j] = Instantiate(cell, parent);
                 cells[i, j].GetComponent<RectTransform>().sizeDelta = new Vector2(cellSize, cellSize);
@@ -86,51 +94,74 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    private void SetBoard()
+    private IEnumerator SetBoard()
     {
-        for (int i = 0; i < dimensions; i++)
+        if (GameObject.FindObjectOfType<UC_LevelCreator>())
         {
-            for (int j = 0; j < dimensions; j++)
-            {
-                if (boardData.rows[j].pieces[i] != PieceType.NONE)
-                {
-                    cells[i, j].SetPiece(boardData.rows[j].pieces[i]);
-                    currentPieces.Add(Instantiate(piece, cells[i, j].transform));
-                    currentPieces[currentPieces.Count - 1].SetPieceType(boardData.rows[j].pieces[i]);
-                    currentPieces[currentPieces.Count - 1].GetComponent<RectTransform>().sizeDelta = new Vector2(cellSize, cellSize);
-                    currentPieces[currentPieces.Count - 1].GetComponent<RectTransform>().anchoredPosition = Vector3.zero;
+            Debug.Log("Detected level creator");
+            UC_LevelCreator.instance.FinalizeBoard(cells);
+            yield break;
+        }
 
-                    //currentPieces[currentPieces.Count - 1].SetStartingPos();
+        yield return new WaitForSeconds(.4f);
+        for (int i = 0; i < boardData.dimension; i++)
+            for (int j = 0; j < boardData.dimension; j++)
+                if (boardData.rowData[i].colData[j] != PieceType.NONE)
+                {
+                    cells[j, i].SetPiece(boardData.rowData[i].colData[j]);
+                    currentPieces.Add(Instantiate(piece, cells[j, i].transform));
+                    currentPieces[currentPieces.Count - 1].SetPieceType(boardData.rowData[i].colData[j]);
+                    currentPieces[currentPieces.Count - 1].GetComponent<RectTransform>().sizeDelta = new Vector2(cellSize, cellSize);
+                    currentPieces[currentPieces.Count - 1].GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 2000, 0);
                     currentPieces[currentPieces.Count - 1].SetCollider();
 
                     int spriteIndex = 0;
-                    if (boardData.rows[j].pieces[i] == PieceType.PAWN)
+                    if (boardData.rowData[i].colData[j] == PieceType.PAWN)
                         spriteIndex = 2;
-                    if (boardData.rows[j].pieces[i] == PieceType.ROOK)
+                    if (boardData.rowData[i].colData[j] == PieceType.ROOK)
                         spriteIndex = 0;
-                    if (boardData.rows[j].pieces[i] == PieceType.QUEEN)
+                    if (boardData.rowData[i].colData[j] == PieceType.QUEEN)
                         spriteIndex = 1;
-                    if (boardData.rows[j].pieces[i] == PieceType.KNIGHT)
+                    if (boardData.rowData[i].colData[j] == PieceType.KNIGHT)
                         spriteIndex = 3;
-                    if (boardData.rows[j].pieces[i] == PieceType.KING)
+                    if (boardData.rowData[i].colData[j] == PieceType.KING)
                         spriteIndex = 4;
-                    if (boardData.rows[j].pieces[i] == PieceType.BISHOP)
+                    if (boardData.rowData[i].colData[j] == PieceType.BISHOP)
                         spriteIndex = 5;
 
                     currentPieces[currentPieces.Count - 1].GetComponent<Image>().sprite = pieceSprites[spriteIndex];
                     currentPieces[currentPieces.Count - 1].GetComponent<Image>().color = pieceColor;
+                    yield return new WaitForSeconds(.3f);
                 }
-            }
-        }
+
+        boardSet = true;
+    }
+
+    public Sprite GetSpriteByType(PieceType type)
+    {
+        if (type == PieceType.PAWN)
+            return pieceSprites[2];
+        if (type == PieceType.ROOK)
+            return pieceSprites[0];
+        if (type == PieceType.QUEEN)
+            return pieceSprites[1];
+        if (type == PieceType.KNIGHT)
+            return pieceSprites[3];
+        if (type == PieceType.KING)
+            return pieceSprites[4];
+        if (type == PieceType.BISHOP)
+            return pieceSprites[5];
+
+        return null;
     }
 
     public List<Cell> GenerateLegalMoves(Piece piece)
     {
         List<Cell> legalMoves = new List<Cell>();
 
-        for (int i = 0; i < dimensions; i++)
+        for (int i = 0; i < boardData.dimension; i++)
         {
-            for (int j = 0; j < dimensions; j++)
+            for (int j = 0; j < boardData.dimension; j++)
             {
                 float cI = piece.transform.parent.GetComponent<Cell>().position.x;
                 float cJ = piece.transform.parent.GetComponent<Cell>().position.y;
