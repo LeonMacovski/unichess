@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using DG.Tweening;
 
 public class Piece : MonoBehaviour
 {
@@ -63,8 +62,7 @@ public class Piece : MonoBehaviour
 
     public void ShowPromotionPanel()
     {
-     //   promotionKnight.DOScale(1, .3f).SetEase(Ease.Flash);
-      //  promotionQueen.DOScale(1, .3f);
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
