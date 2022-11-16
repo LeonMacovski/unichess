@@ -4,11 +4,17 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    public PieceType piece;
+    public Piece piece;
     public Vector2 position;
     [HideInInspector] public BoxCollider2D coll2D;
 
-    public void SetPiece(PieceType _piece) => piece = _piece;
+    public void SetPiece(Piece _piece)
+    {
+        if(piece != null && _piece != null)
+            Destroy(piece.gameObject);
+
+        piece = _piece;
+    }
     public void SetCoordinates(Vector2 _position) => position = _position;
     public void SetCollider()
     {

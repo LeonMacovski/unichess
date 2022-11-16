@@ -37,13 +37,13 @@ public class UC_LevelCreator : MonoBehaviour
                 btn.onClick.AddListener(() =>
                 {
                     Cell attachedCell = btn.GetComponent<Cell>();
-                    if (pieceToPlace == attachedCell.piece)
-                        BoardManager.instance.ClearCell(attachedCell, PieceType.NONE);
-                    
+                    if (pieceToPlace == attachedCell.piece.type)
+                        attachedCell.SetPiece(null);
+
                     else
                     {
-                        BoardManager.instance.ClearCell(attachedCell, pieceToPlace);
                         Piece tempPiece = Instantiate(BoardManager.instance.piece, attachedCell.transform);
+                        attachedCell.SetPiece(tempPiece);
                         tempPiece.SetPieceType(pieceToPlace);
                         tempPiece.GetComponent<Image>().sprite = BoardManager.instance.GetSpriteByType(pieceToPlace);
                         tempPiece.GetComponent<RectTransform>().sizeDelta = new Vector2(BoardManager.instance.cellSize, BoardManager.instance.cellSize);
@@ -67,7 +67,7 @@ public class UC_LevelCreator : MonoBehaviour
         {
             for (int j = 0; j < tempLevel.dimensions; j++)
             {
-                tempLevel.rowData[i].colData[j] = BoardManager.instance.cells[j, i].piece;
+                tempLevel.rowData[i].colData[j] = BoardManager.instance.cells[j, i].piece.type;
             }
         }
     }

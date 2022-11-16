@@ -60,11 +60,14 @@ public class BoardManager : MonoBehaviour
         {
             currentPieces.RemoveAll(p => p == null);
             if (currentPieces.Count == 1)
+            {
                 HelperScript.instance.DelayedExecution(.4f, () =>
                 {
                     currentPieces[0].GetComponent<Piece>().enabled = false;
                     currentPieces[0].Raise();
                 });
+                boardSet = false;
+            }
         }
     }
 
@@ -76,11 +79,10 @@ public class BoardManager : MonoBehaviour
         StartCoroutine(SetBoard());
     }
 
-    public void ClearCell(Cell cell, PieceType type)
+    public void ClearCell(Cell cell, Piece piece)
     {
-        if (cell.transform.childCount > 0)
-            Destroy(cell.transform.GetChild(0).gameObject);
-        cell.SetPiece(type);
+        Destroy(cell.piece.gameObject);
+        cell.SetPiece(piece);
     }
 
     private void SetValues()
@@ -101,7 +103,7 @@ public class BoardManager : MonoBehaviour
                 cells[i, j].GetComponent<RectTransform>().anchoredPosition = offset + new Vector2(i * cellSize, -j * cellSize);
                 cells[i, j].SetCollider();
                 cells[i, j].SetCoordinates(new Vector2(i, j));
-                cells[i, j].SetPiece(PieceType.NONE);
+                cells[i, j].SetPiece(null);
                 cells[i, j].GetComponent<Image>().color = (j + i) % 2 == 0 ? ligher : darker;
             }
         }
@@ -125,9 +127,8 @@ public class BoardManager : MonoBehaviour
     {
         for (int i = 0; i < boardData.dimensions; i++)
             for (int j = 0; j < boardData.dimensions; j++)
-            {
-                cells[i, j].SetPiece(PieceType.NONE);
-            }
+                cells[i, j].SetPiece(null);
+
         currentPieces.ForEach(p => Destroy(p.gameObject));
         currentPieces = new List<Piece>();
     }
@@ -139,11 +140,12 @@ public class BoardManager : MonoBehaviour
             for (int j = 0; j < boardData.dimensions; j++)
                 if (data[i].colData[j] != PieceType.NONE)
                 {
-                    cells[j, i].SetPiece(data[i].colData[j]);
                     currentPieces.Add(Instantiate(piece, cells[j, i].transform));
                     currentPieces[^1].SetPieceType(data[i].colData[j]);
                     currentPieces[^1].GetComponent<RectTransform>().sizeDelta = new Vector2(cellSize, cellSize);
-                    currentPieces[^1].GetComponent<RectTransform>().anchoredPosition = new Vector3(0, doAnim ? 2000 : 0, 0);
+                    cells[j, i].SetPiece(currentPieces[^1]);
+                    if (doAnim)
+                        currentPieces[^1].Lower();
 
                     int spriteIndex = 0;
                     if (data[i].colData[j] == PieceType.PAWN)
@@ -196,7 +198,7 @@ public class BoardManager : MonoBehaviour
                 float cI = piece.transform.parent.GetComponent<Cell>().position.x;
                 float cJ = piece.transform.parent.GetComponent<Cell>().position.y;
 
-                if (cells[i, j].piece == PieceType.NONE)
+                if (cells[i, j].piece == null)
                     continue;
 
                 if (piece.type == PieceType.PAWN)
@@ -219,7 +221,7 @@ public class BoardManager : MonoBehaviour
                         if (cJ > j)
                         {
                             for (int j1 = j + 1; j1 < cJ; j1++)
-                                if (cells[i, j1].piece != PieceType.NONE)
+                                if (cells[i, j1].piece != null)
                                 {
                                     shouldAdd = false;
                                     break;
@@ -229,7 +231,7 @@ public class BoardManager : MonoBehaviour
                         else if (cJ < j)
                         {
                             for (int j1 = j - 1; j1 > cJ; j1--)
-                                if (cells[i, j1].piece != PieceType.NONE)
+                                if (cells[i, j1].piece != null)
                                 {
                                     shouldAdd = false;
                                     break;
@@ -242,7 +244,7 @@ public class BoardManager : MonoBehaviour
                         if (cI > i)
                         {
                             for (int i1 = i + 1; i1 < cI; i1++)
-                                if (cells[i1, j].piece != PieceType.NONE)
+                                if (cells[i1, j].piece != null)
                                 {
                                     shouldAdd = false;
                                     break;
@@ -252,7 +254,7 @@ public class BoardManager : MonoBehaviour
                         else if (cI < i)
                         {
                             for (int i1 = i - 1; i1 > cI; i1--)
-                                if (cells[i1, j].piece != PieceType.NONE)
+                                if (cells[i1, j].piece != null)
                                 {
                                     shouldAdd = false;
                                     break;
@@ -274,28 +276,28 @@ public class BoardManager : MonoBehaviour
                         continue;
 
                     for (int i1 = i - 1, j1 = j - 1; i1 > cI && j1 > cJ; i1--, j1--)
-                        if (cells[i1, j1].piece != PieceType.NONE)
+                        if (cells[i1, j1].piece != null)
                         {
                             shouldMove = false;
                             break;
                         }
 
                     for (int i1 = i + 1, j1 = j + 1; i1 < cI && j1 < cJ; i1++, j1++)
-                        if (cells[i1, j1].piece != PieceType.NONE)
+                        if (cells[i1, j1].piece != null)
                         {
                             shouldMove = false;
                             break;
                         }
 
                     for (int i1 = i + 1, j1 = j - 1; i1 < cI && j1 > cJ; i1++, j1--)
-                        if (cells[i1, j1].piece != PieceType.NONE)
+                        if (cells[i1, j1].piece != null)
                         {
                             shouldMove = false;
                             break;
                         }
 
                     for (int i1 = i - 1, j1 = j + 1; i1 > cI && j1 < cJ; i1--, j1++)
-                        if (cells[i1, j1].piece != PieceType.NONE)
+                        if (cells[i1, j1].piece != null)
                         {
                             shouldMove = false;
                             break;
@@ -343,7 +345,7 @@ public class BoardManager : MonoBehaviour
                         if (cJ > j)
                         {
                             for (int j1 = j + 1; j1 < cJ; j1++)
-                                if (cells[i, j1].piece != PieceType.NONE)
+                                if (cells[i, j1].piece != null)
                                 {
                                     shouldAdd = false;
                                     break;
@@ -353,7 +355,7 @@ public class BoardManager : MonoBehaviour
                         else if (cJ < j)
                         {
                             for (int j1 = j - 1; j1 > cJ; j1--)
-                                if (cells[i, j1].piece != PieceType.NONE)
+                                if (cells[i, j1].piece != null)
                                 {
                                     shouldAdd = false;
                                     break;
@@ -366,7 +368,7 @@ public class BoardManager : MonoBehaviour
                         if (cI > i)
                         {
                             for (int i1 = i + 1; i1 < cI; i1++)
-                                if (cells[i1, j].piece != PieceType.NONE)
+                                if (cells[i1, j].piece != null)
                                 {
                                     shouldAdd = false;
                                     break;
@@ -376,7 +378,7 @@ public class BoardManager : MonoBehaviour
                         else if (cI < i)
                         {
                             for (int i1 = i - 1; i1 > cI; i1--)
-                                if (cells[i1, j].piece != PieceType.NONE)
+                                if (cells[i1, j].piece != null)
                                 {
                                     shouldAdd = false;
                                     break;
@@ -387,28 +389,28 @@ public class BoardManager : MonoBehaviour
                     else
                     {
                         for (int i1 = i - 1, j1 = j - 1; i1 > cI && j1 > cJ; i1--, j1--)
-                            if (cells[i1, j1].piece != PieceType.NONE)
+                            if (cells[i1, j1].piece != null)
                             {
                                 shouldAdd = false;
                                 break;
                             }
 
                         for (int i1 = i + 1, j1 = j + 1; i1 < cI && j1 < cJ; i1++, j1++)
-                            if (cells[i1, j1].piece != PieceType.NONE)
+                            if (cells[i1, j1].piece != null)
                             {
                                 shouldAdd = false;
                                 break;
                             }
 
                         for (int i1 = i + 1, j1 = j - 1; i1 < cI && j1 > cJ; i1++, j1--)
-                            if (cells[i1, j1].piece != PieceType.NONE)
+                            if (cells[i1, j1].piece != null)
                             {
                                 shouldAdd = false;
                                 break;
                             }
 
                         for (int i1 = i - 1, j1 = j + 1; i1 > cI && j1 < cJ; i1--, j1++)
-                            if (cells[i1, j1].piece != PieceType.NONE)
+                            if (cells[i1, j1].piece != null)
                             {
                                 shouldAdd = false;
                                 break;
@@ -461,20 +463,16 @@ public class BoardManager : MonoBehaviour
             tempData[i] = new RowData();
             tempData[i].colData = new PieceType[boardData.dimensions];
             for (int j = 0; j < boardData.dimensions; j++)
-                tempData[i].colData[j] = cells[j, i].piece;
+                tempData[i].colData[j] = cells[j, i].piece == null ? PieceType.NONE : cells[j, i].piece.type;
         }
 
         if(movedPiece.type == PieceType.PAWN && (boardData.doTopPromotion || boardData.doBottomPromotion))
         {
             Cell parentCell = movedPiece.GetComponentInParent<Cell>();
-            if(parentCell.position.y == 0 && boardData.doTopPromotion)
+            if((parentCell.position.y == 0 && boardData.doTopPromotion) ||
+               (parentCell.position.y == boardData.dimensions - 1 && boardData.doBottomPromotion))
             {
-                piece.ShowPromotionPanel();
-            }
-
-            if(parentCell.position.y == boardData.dimensions - 1 && boardData.doBottomPromotion)
-            {
-                
+                movedPiece.TogglePromotionPanel(true);
             }
         }
 
