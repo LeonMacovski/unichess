@@ -71,9 +71,7 @@ public class BoardManager : MonoBehaviour
     public void Init(UC_Level currLevel)
     {
         boardData = currLevel;
-        cells = new Cell[boardData.dimensions, boardData.dimensions];
-        cellSize = parent.sizeDelta.x / boardData.dimensions;
-        offset = new Vector2(-650 + (cellSize / 2), 650 - (cellSize / 2));
+        SetValues();
         GenerateBoard();
         StartCoroutine(SetBoard());
     }
@@ -83,6 +81,13 @@ public class BoardManager : MonoBehaviour
         if (cell.transform.childCount > 0)
             Destroy(cell.transform.GetChild(0).gameObject);
         cell.SetPiece(type);
+    }
+
+    private void SetValues()
+    {
+        cells = new Cell[boardData.dimensions, boardData.dimensions];
+        cellSize = parent.sizeDelta.x / boardData.dimensions;
+        offset = new Vector2((-parent.sizeDelta.x + cellSize) / 2, (parent.sizeDelta.x - cellSize) / 2);
     }
 
     private void GenerateBoard()

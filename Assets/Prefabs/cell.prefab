@@ -30,15 +30,16 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 0}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.000015258789, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.49999997, y: 0.4999999}
+  m_Pivot: {x: 0.49999997, y: 0.5}
 --- !u!222 &6240695574718392463
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -89,7 +90,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0972ce532b4ba748a823448dbaa4373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collider: {fileID: 0}
+  piece: 0
+  position: {x: 0, y: 0}
+  coll2D: {fileID: 0}
 --- !u!61 &4764198351362777811
 BoxCollider2D:
   m_ObjectHideFlags: 0
