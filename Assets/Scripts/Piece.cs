@@ -6,35 +6,22 @@ using UnityEngine.EventSystems;
 public class Piece : MonoBehaviour
 {
     [HideInInspector] public PieceType type;
-    private BoxCollider2D coll2D;
     private List<Cell> legalMoves = new List<Cell>();
     private bool isDragging;
     private Transform newLocation;
-    private bool isSet = false;
-
-    public void SetPieceType(PieceType _type) => type = _type;
-
-    public void SetCollider()
-    {
-        coll2D = GetComponent<BoxCollider2D>();
-        coll2D.size = new Vector3(4, 4, 0);
-    }
 
     private void Update()
     {
         if (isDragging)
             transform.position = Input.mousePosition;
 
-        float step = 5000 * Time.deltaTime;
-
-        if (!isSet)
-        {
-            GetComponent<RectTransform>().anchoredPosition = Vector2.MoveTowards(
-                GetComponent<RectTransform>().anchoredPosition,
-                new Vector3(GetComponent<RectTransform>().anchoredPosition.x, 0, 0),
-                step);
-        }
+        GetComponent<RectTransform>().anchoredPosition = Vector2.MoveTowards(
+            GetComponent<RectTransform>().anchoredPosition,
+            new Vector3(GetComponent<RectTransform>().anchoredPosition.x, 0, 0),
+            5000 * Time.deltaTime);
     }
+    
+    public void SetPieceType(PieceType _type) => type = _type;
 
     public void StartDrag()
     {
@@ -51,19 +38,21 @@ public class Piece : MonoBehaviour
             BoardManager.instance.ClearCell(newLocation.GetComponent<Cell>(), type);
             transform.parent = newLocation;
             legalMoves = new List<Cell>();
+            BoardManager.instance.RegisterMove(this);
         }
         GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
     }
 
     public void Raise()
     {
-        isSet = true;
-        float step = 5000 * Time.deltaTime;
-
         GetComponent<RectTransform>().anchoredPosition = Vector2.MoveTowards(
             GetComponent<RectTransform>().anchoredPosition,
             new Vector3(GetComponent<RectTransform>().anchoredPosition.x, 2000, 0),
-            step);
+            5000 * Time.deltaTime);
+    }
+
+    public void Promote(bool knight)
+    {
 
     }
 

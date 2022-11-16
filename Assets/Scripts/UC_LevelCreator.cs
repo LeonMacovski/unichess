@@ -28,9 +28,9 @@ public class UC_LevelCreator : MonoBehaviour
 
     public void FinalizeBoard(Cell[,] cells)
     {
-        for (int i = 0; i < BoardManager.instance.boardData.dimension; i++)
+        for (int i = 0; i < BoardManager.instance.boardData.dimensions; i++)
         {
-            for (int j = 0; j < BoardManager.instance.boardData.dimension; j++)
+            for (int j = 0; j < BoardManager.instance.boardData.dimensions; j++)
             {
                 Button btn = cells[i, j].gameObject.AddComponent<Button>();
                 btn.onClick.RemoveAllListeners();
@@ -59,13 +59,13 @@ public class UC_LevelCreator : MonoBehaviour
     public void UpdateLevel()
     {
         UC_Level tempLevel = BoardManager.instance.boardData;
-        tempLevel.rowData = new RowData[tempLevel.dimension];
+        tempLevel.rowData = new RowData[tempLevel.dimensions];
         tempLevel.ClearData();
             
 
-        for (int i = 0; i < tempLevel.dimension; i++)
+        for (int i = 0; i < tempLevel.dimensions; i++)
         {
-            for (int j = 0; j < tempLevel.dimension; j++)
+            for (int j = 0; j < tempLevel.dimensions; j++)
             {
                 tempLevel.rowData[i].colData[j] = BoardManager.instance.cells[j, i].piece;
             }

@@ -17,13 +17,4 @@ public class Cell : MonoBehaviour
         coll2D.offset = Vector3.zero;
         coll2D.size = new Vector3(size, size, 0);
     }
-
-    //public void MovePiece()
-    //{
-    //    if(BoardManager.instance.selectedPiece != null)
-    //    {
-    //        BoardManager.instance.selectedPiece.transform.parent = transform;
-    //        BoardManager.instance.selectedPiece.GetComponent<RectTransform>().anchoredPosition = Vector3.zero;
-    //    }
-    //}
 }
