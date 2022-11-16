@@ -2,9 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using DG.Tweening;
 
 public class Piece : MonoBehaviour
 {
+    public RectTransform promotionKnight;
+    public RectTransform promotionQueen;
+
     [HideInInspector] public PieceType type;
     private List<Cell> legalMoves = new List<Cell>();
     private bool isDragging;
@@ -20,7 +24,7 @@ public class Piece : MonoBehaviour
             new Vector3(GetComponent<RectTransform>().anchoredPosition.x, 0, 0),
             5000 * Time.deltaTime);
     }
-    
+
     public void SetPieceType(PieceType _type) => type = _type;
 
     public void StartDrag()
@@ -38,6 +42,7 @@ public class Piece : MonoBehaviour
             BoardManager.instance.ClearCell(newLocation.GetComponent<Cell>(), type);
             transform.parent = newLocation;
             legalMoves = new List<Cell>();
+            GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
             BoardManager.instance.RegisterMove(this);
         }
         GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
@@ -54,6 +59,12 @@ public class Piece : MonoBehaviour
     public void Promote(bool knight)
     {
 
+    }
+
+    public void ShowPromotionPanel()
+    {
+     //   promotionKnight.DOScale(1, .3f).SetEase(Ease.Flash);
+      //  promotionQueen.DOScale(1, .3f);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

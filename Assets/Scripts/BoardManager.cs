@@ -469,7 +469,7 @@ public class BoardManager : MonoBehaviour
             Cell parentCell = movedPiece.GetComponentInParent<Cell>();
             if(parentCell.position.y == 0 && boardData.doTopPromotion)
             {
-                
+                piece.ShowPromotionPanel();
             }
 
             if(parentCell.position.y == boardData.dimensions - 1 && boardData.doBottomPromotion)
