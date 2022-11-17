@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class Piece : MonoBehaviour
 {
@@ -30,6 +30,8 @@ public class Piece : MonoBehaviour
 
     public void StartDrag()
     {
+        if (!BoardManager.instance.running)
+            return;
         isDragging = true;
         legalMoves = BoardManager.instance.GenerateLegalMoves(this);
     }
@@ -60,7 +62,11 @@ public class Piece : MonoBehaviour
 
     public void Promote(bool knight)
     {
-
+        PieceType promoteTo = knight ? PieceType.KNIGHT : PieceType.QUEEN;
+        type = promoteTo;
+        GetComponent<Image>().sprite = BoardManager.instance.GetSpriteByType(promoteTo);
+        TogglePromotionPanel(false);
+        BoardManager.instance.RegisterPromotion(promoteTo);
     }
 
     public void TogglePromotionPanel(bool show)

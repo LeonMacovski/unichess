@@ -39,6 +39,8 @@ public class BoardManager : MonoBehaviour
     public float cellSize { get; private set; }
     public Cell[,] cells { get; private set; }
 
+    public bool running { get; private set; }
+
     public static BoardManager instance;
 
     private void Awake()
@@ -51,6 +53,7 @@ public class BoardManager : MonoBehaviour
         currentPieces = new List<Piece>();
         history = new List<BoardState>();
         boardSet = false;
+        running = true;
         Init(boardData);
     }
 
@@ -466,22 +469,40 @@ public class BoardManager : MonoBehaviour
                 tempData[i].colData[j] = cells[j, i].piece == null ? PieceType.NONE : cells[j, i].piece.type;
         }
 
-        if(movedPiece.type == PieceType.PAWN && (boardData.doTopPromotion || boardData.doBottomPromotion))
+        if (movedPiece.type == PieceType.PAWN && (boardData.doTopPromotion || boardData.doBottomPromotion))
         {
             Cell parentCell = movedPiece.GetComponentInParent<Cell>();
-            if((parentCell.position.y == 0 && boardData.doTopPromotion) ||
+            if ((parentCell.position.y == 0 && boardData.doTopPromotion) ||
                (parentCell.position.y == boardData.dimensions - 1 && boardData.doBottomPromotion))
             {
                 movedPiece.TogglePromotionPanel(true);
+                running = false;
+                return;
             }
         }
 
         history.Add(new BoardState(tempData, movedPiece.type));
     }
 
+    public void RegisterPromotion(PieceType type)
+    {
+        RowData[] tempData = new RowData[boardData.dimensions];
+
+        for (int i = 0; i < boardData.dimensions; i++)
+        {
+            tempData[i] = new RowData();
+            tempData[i].colData = new PieceType[boardData.dimensions];
+            for (int j = 0; j < boardData.dimensions; j++)
+                tempData[i].colData[j] = cells[j, i].piece == null ? PieceType.NONE : cells[j, i].piece.type;
+        }
+
+        history.Add(new BoardState(tempData, type));
+        running = true;
+    }
+
     public void UndoMove()
     {
-        if (history.Count < 2)
+        if (history.Count < 2 || !running)
             return;
         history.RemoveAt(history.Count - 1);
         ClearBoard();
