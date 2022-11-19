@@ -30,5 +30,10 @@ public class RowData
     {
         return colData.Any(p => p == type);
     }
+
+    public List<int> GetPieceIndex(PieceType type)
+    {
+        return colData.ToList().Where(c => c == type).Select(c => colData.ToList().IndexOf(c)).ToList();
+    }
 }
 

@@ -37,7 +37,7 @@ public class UC_LevelCreator : MonoBehaviour
                 btn.onClick.AddListener(() =>
                 {
                     Cell attachedCell = btn.GetComponent<Cell>();
-                    if (pieceToPlace == attachedCell.piece.type)
+                    if (attachedCell.piece != null && pieceToPlace == attachedCell.piece.type)
                         attachedCell.SetPiece(null);
 
                     else
@@ -62,14 +62,9 @@ public class UC_LevelCreator : MonoBehaviour
         tempLevel.rowData = new RowData[tempLevel.dimensions];
         tempLevel.ClearData();
             
-
         for (int i = 0; i < tempLevel.dimensions; i++)
-        {
             for (int j = 0; j < tempLevel.dimensions; j++)
-            {
-                tempLevel.rowData[i].colData[j] = BoardManager.instance.cells[j, i].piece.type;
-            }
-        }
+                tempLevel.rowData[i].colData[j] = BoardManager.instance.cells[j, i].piece == null ? PieceType.NONE : BoardManager.instance.cells[j, i].piece.type;
     }
 
     public void SelectPieceToPlace(Transform obj)
