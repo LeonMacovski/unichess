@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -201,6 +202,9 @@ public class BoardManager : MonoBehaviour
                 float cI = piece.transform.parent.GetComponent<Cell>().position.x;
                 float cJ = piece.transform.parent.GetComponent<Cell>().position.y;
 
+                if (i == cI && j == cJ)
+                    continue;
+
                 if (cells[i, j].piece == null)
                     continue;
 
@@ -315,22 +319,23 @@ public class BoardManager : MonoBehaviour
                 {
                     bool shouldMove = false;
 
-                    if (cI == i + 1 && cJ == j)
+                    if (cI == i + 1 && cJ == j && !BordersPiece(i, j, PieceType.KING, ((int)cI, (int)cJ)))
                         shouldMove = true;
-                    else if (cI == i - 1 && cJ == j)
+                    else if (cI == i - 1 && cJ == j && !BordersPiece(i, j, PieceType.KING, ((int)cI, (int)cJ)))
                         shouldMove = true;
-                    else if (cJ == j + 1 && cI == i)
+                    else if (cJ == j + 1 && cI == i && !BordersPiece(i, j, PieceType.KING, ((int)cI, (int)cJ)))
                         shouldMove = true;
-                    else if (cJ == j - 1 && cI == i)
+                    else if (cJ == j - 1 && cI == i && !BordersPiece(i, j, PieceType.KING, ((int)cI, (int)cJ)))
                         shouldMove = true;
-                    else if (cJ == j - 1 && cI == i - 1)
+                    else if (cJ == j - 1 && cI == i - 1 && !BordersPiece(i, j, PieceType.KING, ((int)cI, (int)cJ)))
                         shouldMove = true;
-                    else if (cJ == j - 1 && cI == i + 1)
+                    else if (cJ == j - 1 && cI == i + 1 && !BordersPiece(i, j, PieceType.KING, ((int)cI, (int)cJ)))
                         shouldMove = true;
-                    else if (cJ == j + 1 && cI == i - 1)
+                    else if (cJ == j + 1 && cI == i - 1 && !BordersPiece(i, j, PieceType.KING, ((int)cI, (int)cJ)))
                         shouldMove = true;
-                    else if (cJ == j + 1 && cI == i + 1)
+                    else if (cJ == j + 1 && cI == i + 1 && !BordersPiece(i, j, PieceType.KING, ((int)cI, (int)cJ)))
                         shouldMove = true;
+
 
                     if (!shouldMove)
                         continue;
@@ -448,13 +453,60 @@ public class BoardManager : MonoBehaviour
                         continue;
                 }
 
+                if (history[^1].checkedKings.Count > 0 && StateCheck(piece, i, j))
+                    continue;
+
                 legalMoves.Add(cells[i, j]);
             }
         }
 
-
-
         return legalMoves;
+    }
+
+    private bool StateCheck(Piece piece, int x, int y)
+    {
+        int cI = (int)piece.transform.parent.GetComponent<Cell>().position.x;
+        int cJ = (int)piece.transform.parent.GetComponent<Cell>().position.y;
+        RowData[] tempData = new RowData[boardData.dimensions];
+
+        for (int i = 0; i < boardData.dimensions; i++)
+        {
+            tempData[i] = new RowData();
+            tempData[i].colData = new PieceType[boardData.dimensions];
+            for (int j = 0; j < boardData.dimensions; j++)
+                tempData[i].colData[j] = cells[j, i].piece == null ? PieceType.NONE : cells[j, i].piece.type;
+        }
+
+        tempData[cI].colData[cJ] = PieceType.NONE;
+        tempData[y].colData[x] = piece.type;
+
+        return new BoardState(tempData, piece.type).checkedKings.Count > 0;
+    }
+
+    private bool BordersPiece(int x, int y, PieceType piece, (int, int) ignore)
+    {
+        bool borders = false;
+
+        for (int i = x - 1; i < x + 2; i++)
+        {
+            for (int j = y - 1; j < y + 2; j++)
+            {
+                if ((i, j) == ignore)
+                    continue;
+
+                bool hEdge = i < 0 || i >= boardData.dimensions;
+                bool vEdge = j < 0 || j >= boardData.dimensions;
+
+                if (hEdge || vEdge)
+                    continue;
+                if (cells[i, j].piece == null)
+                    continue;
+                if (cells[i, j].piece.type == piece)
+                    borders = true;
+            }
+        }
+        Debug.Log(borders);
+        return borders;
     }
 
     public void RegisterMove(Piece movedPiece)

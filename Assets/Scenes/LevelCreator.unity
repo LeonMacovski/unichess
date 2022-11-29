@@ -732,7 +732,7 @@ MonoBehaviour:
   pieceColor: {r: 0.16078432, g: 0.5019608, b: 0.7254902, a: 1}
   ligher: {r: 0.58431375, g: 0.64705884, b: 0.6509804, a: 1}
   darker: {r: 0.17254902, g: 0.24313726, b: 0.3137255, a: 1}
-  boardData: {fileID: 11400000, guid: 774ca150197699b42b27aaf519996042, type: 2}
+  boardData: {fileID: 11400000, guid: 228db2b36a69618448db2e9cbabafed4, type: 2}
 --- !u!1 &969151183
 GameObject:
   m_ObjectHideFlags: 0
