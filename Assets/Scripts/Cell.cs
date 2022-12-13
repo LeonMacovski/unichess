@@ -19,6 +19,14 @@ public class Cell : MonoBehaviour
         piece = _piece;
     }
 
+    public void RemovePiece()
+    {
+        if (piece == null)
+            return;
+        Destroy(piece.gameObject);
+        piece = null;
+    }
+
     public void SetCoordinates(Vector2 _position)
     {
         position = _position;

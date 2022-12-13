@@ -38,7 +38,7 @@ public class UC_LevelCreator : MonoBehaviour
                 {
                     Cell attachedCell = btn.GetComponent<Cell>();
                     if (attachedCell.piece != null && pieceToPlace == attachedCell.piece.type)
-                        attachedCell.SetPiece(null);
+                        attachedCell.RemovePiece();
 
                     else
                     {

@@ -18,7 +18,7 @@ public enum PieceType
     QUEEN
 }
 
-public class BoardManager : MonoBehaviour
+public class BoardManager : PopupObjectResult
 {
     [Header("Setup")]
     public Cell cell;
@@ -49,7 +49,7 @@ public class BoardManager : MonoBehaviour
         instance = this;
     }
 
-    void Start()
+    public override void Execute()
     {
         currentPieces = new List<Piece>();
         history = new List<BoardState>();
@@ -60,6 +60,9 @@ public class BoardManager : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.L))
+            Execute();
+
         if (boardSet)
         {
             currentPieces.RemoveAll(p => p == null);
@@ -480,7 +483,9 @@ public class BoardManager : MonoBehaviour
         tempData[cI].colData[cJ] = PieceType.NONE;
         tempData[y].colData[x] = piece.type;
 
-        return new BoardState(tempData, piece.type).checkedKings.Count > 0;
+        BoardState tempState = new BoardState(tempData, piece.type);
+
+        return tempState.checkedKings.Count > 0;
     }
 
     private bool BordersPiece(int x, int y, PieceType piece, (int, int) ignore)
@@ -505,7 +510,6 @@ public class BoardManager : MonoBehaviour
                     borders = true;
             }
         }
-        Debug.Log(borders);
         return borders;
     }
 
