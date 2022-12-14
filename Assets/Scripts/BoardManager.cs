@@ -28,14 +28,17 @@ public class BoardManager : PopupObjectResult
     public Color pieceColor;
     public Color ligher;
     public Color darker;
+    public Image checkIndicator;
 
     [Header("Board")]
     public UC_Level boardData;
+
 
     private List<BoardState> history;
     private List<Piece> currentPieces;
     private Vector2 offset;
     private bool boardSet;
+    private List<BoardState> stateChecks;
 
     public float cellSize { get; private set; }
     public Cell[,] cells { get; private set; }
@@ -53,6 +56,7 @@ public class BoardManager : PopupObjectResult
     {
         currentPieces = new List<Piece>();
         history = new List<BoardState>();
+        stateChecks = new List<BoardState>();
         boardSet = false;
         running = true;
         Init(boardData);
@@ -65,6 +69,7 @@ public class BoardManager : PopupObjectResult
 
         if (boardSet)
         {
+            checkIndicator.gameObject.SetActive(history[^1].hasCheck);
             currentPieces.RemoveAll(p => p == null);
             if (currentPieces.Count == 1)
             {
@@ -456,7 +461,7 @@ public class BoardManager : PopupObjectResult
                         continue;
                 }
 
-                if (history[^1].checkedKings.Count > 0 && StateCheck(piece, i, j))
+                if (history[^1].hasCheck && StateCheck(piece, i, j))
                     continue;
 
                 legalMoves.Add(cells[i, j]);
@@ -480,12 +485,15 @@ public class BoardManager : PopupObjectResult
                 tempData[i].colData[j] = cells[j, i].piece == null ? PieceType.NONE : cells[j, i].piece.type;
         }
 
-        tempData[cI].colData[cJ] = PieceType.NONE;
+        PieceType targetType = tempData[y].colData[x];
+
+        tempData[cJ].colData[cI] = PieceType.NONE;
         tempData[y].colData[x] = piece.type;
 
-        BoardState tempState = new BoardState(tempData, piece.type);
+        BoardState tempState = new BoardState(tempData, piece.type, $"{targetType} - {y}:{x}");
+        stateChecks.Add(tempState);
 
-        return tempState.checkedKings.Count > 0;
+        return tempState.hasCheck;
     }
 
     private bool BordersPiece(int x, int y, PieceType piece, (int, int) ignore)

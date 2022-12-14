@@ -7,56 +7,20 @@ using UnityEngine;
 [System.Serializable]
 public class BoardState
 {
+    public string stateName;
     public RowData[] state;
     public PieceType movedPiced;
     public List<(int, int)> checkedKings;
-    [TextArea(1,5)]
-    public string stringView;
+    public bool hasCheck;
 
-    public BoardState(RowData[] s, PieceType mP)
+    public BoardState(RowData[] s, PieceType mP, string n = "")
     {
+        stateName = n;
         state = s;
         movedPiced = mP;
         checkedKings = CalculateChecks();
-        stringView = Print();
+        hasCheck = checkedKings.Count > 0;
         checkedKings.ForEach(c => Debug.Log(c));
-    }
-
-    public string Print()
-    {
-        string final = "---------------------------------\n";
-        for (int i = 0; i < state.Length; i++)
-        {
-            for (int j = 0; j < state[i].colData.Length; j++)
-            {
-                final += PieceToString(state[i].colData[j]);
-            }
-            final += "\n";
-        }
-        final += "---------------------------------";
-
-        return final;
-    }
-
-    private string PieceToString(PieceType piece, bool emphasized = false)
-    {
-        switch(piece)
-        {
-            case PieceType.PAWN:
-                return emphasized ? "P" : "p";
-            case PieceType.ROOK:
-                return emphasized ? "R" : "r";
-            case PieceType.BISHOP:
-                return emphasized ? "B" : "b";
-            case PieceType.KNIGHT:
-                return emphasized ? "N" : "n";
-            case PieceType.QUEEN:
-                return emphasized ? "Q" : "q";
-            case PieceType.KING:
-                return emphasized ? "K" : "k";
-            default:
-                return "*";
-        }
     }
 
     private List<(int, int)> CalculateChecks()
